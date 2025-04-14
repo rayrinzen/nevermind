@@ -50,7 +50,7 @@ ${log.userAgent}
         });
 
         // Лог в файл
-        fs.appendFileSync('log.txt', JSON.stringify(log) + '\n');
+        //fs.appendFileSync('log.txt', JSON.stringify(log) + '\n');
 
         // Редирект на песню
         res.redirect('https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK');
